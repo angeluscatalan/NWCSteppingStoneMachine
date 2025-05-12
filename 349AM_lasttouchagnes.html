@@ -1,4 +1,266 @@
-let supplyCount, demandCount;
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Northwest Corner Method</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2eafa;
+        color: #5c4b7d;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+        td {
+            border: 1px solid #b583d8;
+            padding: 10px;
+            text-align: center;
+            min-width: 60px;
+            position: relative;
+        }
+
+        .cost-value {
+        position: absolute;
+        top: 2px;
+        right: 5px;
+        font-size: 12px;
+        color: gray;
+        }
+
+        .blocked-cell {
+          color: red;
+          font-weight: normal;
+          font-size: 18px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .active {
+        display: flex;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #b583d8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+      button:hover {
+        background-color: #9c6cc1;
+      }
+
+      .button-container {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      th {
+        border: 1px solid #b583d8;
+        padding: 10px;
+        text-align: center;
+        min-width: 60px;
+      }
+
+      th {
+        background-color: #f0dffb;
+      }
+
+      .step {
+        margin-top: 20px;
+      }
+
+      .diagonal-cell {
+        position: relative;
+        width: 80px;
+        height: 60px;
+      }
+
+      .diagonal-cell::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to left bottom,
+          transparent 49.5%,
+          #b583d8 49.5%,
+          #b583d8 50.5%,
+          transparent 50.5%
+        );
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .top-value {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-weight: bold;
+        font-size: 17px;
+      }
+
+      .bottom-value {
+        position: absolute;
+        bottom: 10px;
+        left: 20px;
+        font-weight: bold;
+        font-size: 17px;
+      }
+
+      .equal {
+        color: green;
+      }
+
+      .not-equal {
+        color: red;
+      }
+
+      #stepHistoryContainer {
+        display: none;
+      }
+
+      .history-btn {
+        background-color: #b583d8;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        margin-left: 10px;
+        cursor: pointer;
+      }
+
+      .history-btn:hover {
+        background-color: #9c6cc1;
+      }
+
+      .modal {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+      }
+
+    </style>
+  </head>
+
+  <body>
+
+    <div class="screen active" id="startScreen">
+      <h2>NORTHWEST CORNER METHOD</h2>
+      <button onclick="nextScreen('dimensionScreen')">START</button>
+    </div>
+
+    <div class="screen" id="dimensionScreen">
+      <h2>NORTHWEST CORNER METHOD</h2>
+      <label
+        >Supply Points: <input type="number" id="supplyCount" min="1"
+      /></label>
+      <label
+        >Demand Points: <input type="number" id="demandCount" min="1"
+      /></label>
+      <div class="button-container">
+        <button onclick="previousScreen()">Back</button>
+        <button onclick="generateCombinedMatrix()">Generate Input Table</button>
+      </div>
+    </div>
+
+    <div class="screen" id="inputMatrixScreen">
+      <h2>Enter Cost, Supply and Demand</h2>
+      <table id="inputMatrix"></table>
+      <div class="button-container">
+        <button onclick="goBackToDimensionScreen()">Back</button>
+        <button onclick="solveWithNorthwestCorner()">Solve</button>
+      </div>
+    </div>
+
+    <div class="screen" id="resultScreen">
+      <h2>Step-by-Step Allocation</h2>
+      <div id="stepOutput"></div>
+      <table id="allocationTable"></table>
+<div class="button-container">
+        <button onclick="goBackToInputMatrix()">Back</button>
+        <button id="nextStepButton" onclick="showNextStep()">Next Step</button>
+      </div>
+      <!-- Step History Modal Trigger (hidden initially) -->
+      <div class="button-container" style="margin-top: 5px; justify-content: center;">
+        <button id="toggleStepHistoryBtn" style="display: none;" disabled>
+          Show Step History
+        </button>
+      </div>
+      <!-- Step History Modal -->
+      <div id="stepHistoryModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); justify-content:center; align-items:center;">
+        <div class="modal-content" style="background:#fff; border-radius:10px; padding:24px 20px 16px 20px; min-width:350px; max-width:90vw; max-height:80vh; overflow-y:auto; box-shadow:0 2px 24px rgba(0,0,0,0.18); position:relative;">
+          <button class="close-modal" style="position:absolute;top:8px;right:16px;font-size:22px;color:#b583d8;background:none;border:none;cursor:pointer;" onclick="closeStepHistoryModal()">&times;</button>
+          <h3 style="margin-top:0;">Step History</h3>
+          <div
+            id="stepHistoryContainer"
+            style="
+              max-height: 350px;
+              overflow-y: auto;
+              width: 95%;
+              margin-top: 10px;
+              border: 1px solid #b583d8;
+              border-radius: 8px;
+              background: #faf7ff;
+              padding: 10px;
+              display: block;
+            "
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="steppingStoneScreen">
+      <h2>Stepping Stone Method</h2>
+      <div id="steppingStoneOutput"></div>
+      <table id="steppingStoneTable"></table>
+    </div>
+
+    <script>
+        let supplyCount, demandCount;
         let supply = [],
             demand = [],
             costMatrix = [],
@@ -1653,3 +1915,6 @@ function showSteppingStoneStepByStep(steps, finalMatrix) {
   }
   renderStep(currentStep);
 }
+    </script>
+  </body>
+</html>

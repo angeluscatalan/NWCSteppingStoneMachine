@@ -6,8 +6,8 @@
     <title>Northwest Corner Method</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-
   <body>
+
     <div class="screen active" id="startScreen">
       <h2>NORTHWEST CORNER METHOD</h2>
       <button onclick="nextScreen('dimensionScreen')">START</button>
@@ -40,38 +40,43 @@
       <h2>Step-by-Step Allocation</h2>
       <div id="stepOutput"></div>
       <table id="allocationTable"></table>
-      <div class="button-container">
+<div class="button-container">
         <button onclick="goBackToInputMatrix()">Back</button>
         <button id="nextStepButton" onclick="showNextStep()">Next Step</button>
       </div>
-      <button id="toggleStepHistoryBtn" style="margin-top: 10px">
-        Show Step History
-      </button>
-      <button id="updateHistoryBtn" class="history-btn">Update History</button>
-      <div
-        id="stepHistoryContainer"
-        style="
-          display: none;
-          max-height: 350px;
-          overflow-y: auto;
-          width: 100%;
-          margin-top: 10px;
-          border: 1px solid #b583d8;
-          border-radius: 8px;
-          background: #faf7ff;
-          padding: 10px;
-        "
-      ></div>
+      <!-- Step History Modal Trigger (hidden initially) -->
+      <div class="button-container" style="margin-top: 5px; justify-content: center;">
+        <button id="toggleStepHistoryBtn" style="display: none;" disabled>
+          Show Step History
+        </button>
+      </div>
+      <!-- Step History Modal -->
+      <div id="stepHistoryModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); justify-content:center; align-items:center;">
+        <div class="modal-content" style="background:#fff; border-radius:10px; padding:24px 20px 16px 20px; min-width:350px; max-width:90vw; max-height:80vh; overflow-y:auto; box-shadow:0 2px 24px rgba(0,0,0,0.18); position:relative;">
+          <button class="close-modal" style="position:absolute;top:8px;right:16px;font-size:22px;color:#b583d8;background:none;border:none;cursor:pointer;" onclick="closeStepHistoryModal()">&times;</button>
+          <h3 style="margin-top:0;">Step History</h3>
+          <div
+            id="stepHistoryContainer"
+            style="
+              max-height: 350px;
+              overflow-y: auto;
+              width: 95%;
+              margin-top: 10px;
+              border: 1px solid #b583d8;
+              border-radius: 8px;
+              background: #faf7ff;
+              padding: 10px;
+              display: block;
+            "
+          ></div>
+        </div>
+      </div>
     </div>
 
     <div class="screen" id="steppingStoneScreen">
       <h2>Stepping Stone Method</h2>
       <div id="steppingStoneOutput"></div>
       <table id="steppingStoneTable"></table>
-      <div class="button-container">
-        <button onclick="goBackToInputMatrix()">Back</button>
-        <button id="restartButton" onclick="location.reload()">Restart</button>
-      </div>
     </div>
     <script src="script.js"></script>
   </body>
